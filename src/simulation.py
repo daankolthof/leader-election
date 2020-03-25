@@ -28,7 +28,7 @@ logging.info("Waking up %i node(s)", number_of_nodes_to_wake)
 
 
 # Define the function that will run on the new threads
-def thread_function(node):
+def run_on_thread(node):
     logging.info("Thread starting for node %i", node.node_number)
     node.wakeup()
     logging.info("Thread stopped for node %i", node.node_number)
@@ -37,7 +37,7 @@ def thread_function(node):
 # Create all threads (with function listed above)
 threads = []
 for i in range(0, number_of_nodes_to_wake):
-    threads.append(threading.Thread(target=thread_function, args=(nodes[i],)))
+    threads.append(threading.Thread(target=run_on_thread, args=(nodes[i],)))
 
 # Start threads
 for thread in threads:
