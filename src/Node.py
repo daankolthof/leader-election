@@ -71,6 +71,7 @@ class Node:
 
                         avs_message: Message = Message(MessageType.AVS, self)
                         msg_body.receive(self, avs_message)
+
                     else:
                         avs_response_message: Message = Message(MessageType.AVS_RESP, self.candidate_predecessor)
                         self.candidate_successor.receive(self, avs_response_message)
@@ -82,7 +83,19 @@ class Node:
                     self.status = NodeState.leader
 
         elif msg_type == MessageType.AVS:
-            exit()
+            if NodeState.candidate == self.status:
+                if not self.candidate_predecessor:
+                    self.candidate_successor = msg_body
+
+                else:
+                    avs_response_message: Message = Message(MessageType.AVS_RESP, self.candidate_predecessor)
+                    msg_body.receive(self, avs_response_message)
+
+                    self.status = NodeState.dummy
+
+            elif NodeState.waiting == self.status
+                self.candidate_successor = msg_body
+
         elif msg_type == MessageType.AVSRSP:
             exit()
         else:
