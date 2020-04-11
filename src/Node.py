@@ -93,10 +93,10 @@ class Node:
 
                     self.status = NodeState.dummy
 
-            elif NodeState.waiting == self.status
+            elif NodeState.waiting == self.status:
                 self.candidate_successor = msg_body
 
-        elif msg_type == MessageType.AVSRSP:
+        elif msg_type == MessageType.AVS_RESP:
             exit()
         else:
             raise RuntimeError("Unknown message type: " + msg_type)
