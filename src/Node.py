@@ -40,7 +40,7 @@ class Node:
         self.status = NodeState.candidate
         # Construct an ALG message and send it to the node's neighbour
         algMessage: Message = Message(MessageType.ALG, {})
-        self.neighbour_node.receive(algMessage)
+        self.neighbour_node.receive(self, algMessage)
 
     def receive(self, from_node, message):
         # Delay the receive a bit to allow other threads to do their thing as well (to simulate network traffic)
