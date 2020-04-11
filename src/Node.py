@@ -44,7 +44,7 @@ class Node:
         self.status = NodeState.candidate
 
         # Construct an ALG message and send it to the node's neighbour
-        alg_message: Message = Message(MessageType.ALG, {"init": self})
+        alg_message: Message = Message(MessageType.ALG, self)
         self.neighbour_node.receive(self, alg_message)
 
     def receive(self, from_node, incoming_message):
@@ -63,21 +63,21 @@ class Node:
                 self.neighbour_node.receive(self, alg_message)
 
             elif NodeState.candidate == self.status:
-                self.candidate_predecessor = msg_body["init"]
+                self.candidate_predecessor = msg_body
 
-                if self.node_number > msg_body["init"].node_number:
+                if self.node_number > msg_body.node_number:
                     if not self.candidate_successor:
                         self.status = NodeState.waiting
 
-                        avs_message: Message = Message(MessageType.AVS, {"j": self})
-                        msg_body["init"].receive(self, avs_message)
+                        avs_message: Message = Message(MessageType.AVS, self)
+                        msg_body.receive(self, avs_message)
                     else:
-                        avs_response_message: Message = Message(MessageType.AVS_RESP, {"k": self.candidate_predecessor})
+                        avs_response_message: Message = Message(MessageType.AVS_RESP, self.candidate_predecessor)
                         self.candidate_successor.receive(self, avs_response_message)
 
                         self.status = NodeState.dummy
 
-                elif self.node_number == msg_body["init"].node_number:
+                elif self.node_number == msg_body.node_number:
                     logging.info("Node %i has been made leader", self.node_number)
                     self.status = NodeState.leader
 
