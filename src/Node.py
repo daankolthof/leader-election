@@ -78,7 +78,7 @@ class Node:
 
                         self.status = NodeState.dummy
 
-                elif self.node_number == msg_body.node_number:
+                elif self == msg_body:
                     logging.info("Node %i has been made leader", self.node_number)
                     self.status = NodeState.leader
 
@@ -97,7 +97,27 @@ class Node:
                 self.candidate_successor = msg_body
 
         elif msg_type == MessageType.AVS_RESP:
-            exit()
+            if NodeState.waiting == self.status:
+                if self == msg_body:
+                    logging.info("Node %i has been made leader", self.node_number)
+                    self.status = NodeState.leader
+
+                else:
+                    self.candidate_predecessor = msg_body
+
+                    if not self.candidate_successor:
+                        if msg_body.node_number < self.node_number:
+                            self.status = NodeState.waiting
+
+                            avs_message: Message = Message(MessageType.AVS, self)
+                            msg_body.receive(self, avs_message)
+
+                    else:
+                        self.status = NodeState.dummy
+
+                        avs_response_message: Message = Message(MessageType.AVS_RESP, msg_body)
+                        self.candidate_successor.receive(self, avs_response_message)
+
         else:
             raise RuntimeError("Unknown message type: " + msg_type)
 
