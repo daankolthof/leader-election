@@ -15,3 +15,4 @@ class MessageType(Enum):
     ALG = auto()
     AVS = auto()
     AVS_RESP = auto()
+    WAKEUP = auto()
