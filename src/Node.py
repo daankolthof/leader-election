@@ -9,7 +9,7 @@ from src.Message import Message, MessageType
 
 def random_timeout():
     #timeout = 1 + random.uniform(-0.1, 0.1)
-    timeout = random.uniform(0, 0.5)
+    timeout = random.uniform(0, 0.01)
     time.sleep(timeout)
 
 
@@ -22,7 +22,8 @@ class NodeState(Enum):
 
 
 class Node:
-    leader_elected = False
+    leader_elected = None
+    expected_leader = -1
 
     def __init__(self, node_number):
         self.node_number = node_number
@@ -56,7 +57,7 @@ class Node:
                     from_node, message = self.message_queue.pop(0)
 
             if message:
-                if MessageType.WAKEUP == message.msg_type:
+                if MessageType.WAKEUP == message.msg_type and NodeState.passive == self.status:
                     self.wakeup()
                 else:
                     self.process_message(from_node, message)
@@ -70,13 +71,15 @@ class Node:
         alg_message: Message = Message(MessageType.ALG, self)
         self.neighbour_node.receive(self, alg_message)
 
+        Node.expected_leader = max(self.node_number, Node.expected_leader)
+
     def receive(self, from_node, incoming_message):
         logging.info("Node %i  received '%s' from node %s", self.node_number, incoming_message, from_node)
         with self.lock:
             self.message_queue.append((from_node, incoming_message))
 
     def process_message(self, from_node, incoming_message):
-        logging.info("Node %i  is processing '%s' from node %i", self.node_number, incoming_message, from_node.node_number)
+        logging.info("Node %i (status:%s)  is processing '%s' from node %i", self.node_number, self.status, incoming_message, from_node.node_number)
 
         msg_body = incoming_message.msg_body
         msg_type: MessageType = incoming_message.msg_type
@@ -94,7 +97,7 @@ class Node:
                 if self == msg_body:
                     logging.info("Node %i has been made leader", self.node_number)
                     self.status = NodeState.leader
-                    Node.leader_elected = True
+                    Node.leader_elected = self.node_number
 
                 else:
                     if not self.candidate_successor:
@@ -130,7 +133,7 @@ class Node:
                 if self == msg_body:
                     logging.info("Node %i has been made leader", self.node_number)
                     self.status = NodeState.leader
-                    Node.leader_elected = True
+                    Node.leader_elected = self.node_number
 
                 else:
                     self.candidate_predecessor = msg_body
