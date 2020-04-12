@@ -152,5 +152,4 @@ class Node:
             raise RuntimeError("Unknown message type: " + msg_type)
 
     def __str__(self):
-        return "Node " + str(self.node_number) + " with neighbour: " + (
-            str(self.neighbour_node.node_number) if self.neighbour_node else None)
+        return "Node " + str(self.node_number)
