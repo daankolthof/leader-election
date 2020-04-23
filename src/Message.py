@@ -6,12 +6,8 @@ class MessageType(Enum):
     ALIVE = auto()
     VICTORY = auto()
 
-    # Not part of the leader election algorithm, used by nodes to check each other.
-    PING = auto()
-    PONG = auto()
-
-    # Not part of the leader election algorithm, used for to instruct a node to simulate failure.
-    FAIL_NODE = auto()
+    # Instruct a node to start the leader election algorithm.
+    WAKEUP = auto()
 
 
 class Message:
