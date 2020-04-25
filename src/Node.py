@@ -11,6 +11,10 @@ def random_timeout():
     time.sleep(timeout)
 
 
+def current_time_millis():
+    return time.time_ns() / 1000000
+
+
 class Node:
     leader_elected = None
     expected_leader = -1
@@ -23,6 +27,8 @@ class Node:
         self.message_queue = []
 
         self.is_running = True
+
+        self.election_message_sent_time_millis = None
 
     def set_all_nodes(self, all_nodes):
         self.all_nodes = all_nodes
@@ -50,6 +56,7 @@ class Node:
             # node_number is array index+1 (so don't do node_number-1 as that will lead to nodes messaging themselves).
             for i in range(self.node_number, len(self.all_nodes)):
                 self.all_nodes[i].receive(self, election_message)
+            self.election_message_sent_time_millis = current_time_millis()
 
     def run(self):
 
@@ -67,6 +74,12 @@ class Node:
 
             if message:
                 self.process_message(from_node, message)
+
+            # Check if we haven't gotten a response in time from sent Election messages.
+            ELECTION_MESSAGE_TIMEOUT_MILLIS = 2000
+            if self.election_message_sent_time_millis and self.election_message_sent_time_millis + ELECTION_MESSAGE_TIMEOUT_MILLIS < current_time_millis():
+                # We have not gotten any response to our Election messages on time, declare this node the new leader.
+                self.on_node_elected_as_leader()
 
     def receive(self, from_node, incoming_message):
         logging.info("Node %i  received '%s' from node %s", self.node_number, incoming_message, from_node)
