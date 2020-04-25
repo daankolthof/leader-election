@@ -12,9 +12,8 @@ class MessageType(Enum):
 
 class Message:
 
-    def __init__(self, msg_type: MessageType, msg_body):
+    def __init__(self, msg_type: MessageType):
         self.msg_type = msg_type
-        self.msg_body = msg_body
 
     def __str__(self):
-        return "Message: {msg_type: " + str(self.msg_type) + ", msg_body: " + str(self.msg_body) + "}"
+        return "Message: {msg_type: " + str(self.msg_type) + "}"
